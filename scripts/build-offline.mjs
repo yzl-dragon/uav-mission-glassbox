@@ -27,8 +27,11 @@ const result = spawnSync(executable, [
 ], { cwd: root, stdio: "inherit" });
 if (result.status !== 0) process.exit(result.status ?? 1);
 
-const css = readFileSync(resolve(root, "offline/app.css"), "utf8");
-const javascript = readFileSync(resolve(root, "offline/app.js"), "utf8").replace(/<\/script/gi, "<\\/script");
+const pnpmDependencyPath = /(?:\.\.\/)+(?:[^/"'\n]+\/)*node_modules\/\.pnpm\/[^/"'\n]+\/node_modules\//g;
+const normalizeDependencyPaths = (content) => content.replace(pnpmDependencyPath, "node_modules/");
+const css = normalizeDependencyPaths(readFileSync(resolve(root, "offline/app.css"), "utf8"));
+const javascript = normalizeDependencyPaths(readFileSync(resolve(root, "offline/app.js"), "utf8"))
+  .replace(/<\/script/gi, "<\\/script");
 const html = `<!doctype html>
 <html lang="zh-CN">
 <head>
